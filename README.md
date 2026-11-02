@@ -3,9 +3,12 @@
 A working discipline for a coding agent, as two files. `SOUL.md` is
 the discipline: how the agent reads, writes code, comments, works with
 Human, waits, measures and writes prose. An agent reads it whole at
-every session start. `SOUL-INSTALL.md` installs it. An agent reads
-that file once and writes `SOUL.md`, the gates and a few stubs into
-the repo by hand. A hash per file checks the copy.
+every session start.
+
+`SOUL-INSTALL.md` installs it. An agent reads that file once and
+writes its first block by hand, an 80-line script. The script writes
+`SOUL.md`, the gates and a few stubs into the repo. A hash per file
+checks the copy.
 
 Both files are generated at the origin, `github.com/leok7v/agentic.devs`,
 from an Open Knowledge Format 0.2 bundle. The origin is a private repo.
@@ -47,11 +50,11 @@ beside the repo. The raw URL is:
 
     https://raw.githubusercontent.com/leok7v/agentic.soul/main/SOUL-INSTALL.md
 
-Say: read this file whole and follow it. The agent
-writes the files, checks each hash and fills in `okf.conf` from what
-it finds in the repo. Then the agent runs every gate, breaks one on
-purpose to see it refuse, and reports. The agent does not commit. You
-look first.
+Say: read this file whole and follow it. The agent writes the block
+writer by hand, checks its hash and runs it for the other files. Then
+the agent fills in `okf.conf` from what it finds in the repo. The agent
+runs every gate, breaks one on purpose to see it refuse, and reports.
+The agent does not commit. You look first.
 
 Then commit the install before anything else. The installed files are
 untracked until you do, and a stash, a branch switch or a cancelled
@@ -62,7 +65,8 @@ an hour that way.
 
 - `SOUL.md` at the root, about 900 lines. The agent reads it on every
   trigger, about 12k tokens, and that cost is planned.
-- `.soul/` with the gates and the two context tools, Python 3 only.
+- `.soul/` with the block writer, the gates and the two context tools,
+  Python 3 only.
 - `.githooks/pre-commit`, and `core.hooksPath` set to it.
 - `CLAUDE.md` with the session-start, bundle, hard-rules, comments and
   task sections between `<!-- soul -->` markers. A new repo gets a

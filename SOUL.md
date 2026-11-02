@@ -1,6 +1,6 @@
 # SOUL.md
 
-<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at ed1de56 -->
+<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at 6c71c87 -->
 
 You are an agent: a coding model with tools, at the start of a session
 in a repo. This file is the whole working discipline in one place, and
@@ -45,6 +45,7 @@ word with other meanings does not go there.
 | mirror | the public repo that carries the installer, `SOUL.md`, a README and the MIT licence | none | `MIRROR` in `soul.py`, `github.com/leok7v/agentic.soul` |
 | installer | `SOUL-INSTALL.md`: the procedure and the blocks an agent writes into a repo | install script | `install()` in `soul.py` |
 | block | one file inside the installer, between two lines of four backticks | none | `block()` in `soul.py` |
+| block writer | `soul_blocks.py`, the first block of the installer; the agent writes it by hand and runs it for the rest | none | `.soul/soul_blocks.py` |
 | verbatim | a block written byte for byte, with its line count and SHA-256 | none | `manifest()` in `soul.py` |
 | project | a repo that installed `SOUL.md` | downstream, consumer | `.soul/` |
 | checkout | a local copy of a repo on disk; "this checkout" is the origin | none | `HERE` in `bin/apply` |
@@ -229,7 +230,8 @@ Do this once, in the first session, before task work.
    `github.com/leok7v/agentic.soul`, or from a checkout of the origin
    beside the repo. Read it whole and follow it. The file installs
    `SOUL.md`, the gates in `.soul/`, the hook in `.githooks/` and the
-   stubs, through you. Nothing runs on its own.
+   stubs, through you. You write its first block by hand, an 80-line
+   script, and run it for the rest. Nothing runs on its own.
 
 2. Fill in `okf.conf`: the repo's URL prefix, the covered source
    directories and suffixes, the comment prefix.

@@ -1,10 +1,11 @@
 # SOUL-INSTALL.md
 
-<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at ed1de56 -->
+<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at 6c71c87 -->
 
 You are an agent with a file tool and a shell, in the repo that will
 carry the discipline of `SOUL.md`. This file installs it, through you.
-Read this file whole, once. Then follow the procedure below. Do not
+Read this file whole, once. Then follow the procedure below: write the
+first block by hand, check its hash, and run it for the rest. Do not
 run this file.
 
 Every file to write is a block under "Files", between two lines of
@@ -25,7 +26,9 @@ reads it again until a refresh.
 ## Procedure
 
 You are the installer. Do the steps in order, in the root of the
-repo. Write each file with your file tool, from its block below.
+repo. You write the first block by hand with your file tool. The
+first block is the block writer, `.soul/soul_blocks.py`, and it writes
+the other blocks for you.
 
 1. Check the base. Run `git status --short`. If the output lists a
    modified or a staged file, stop and tell Human: the install is
@@ -37,22 +40,30 @@ repo. Write each file with your file tool, from its block below.
 WARNING: a file written from memory is not the gate. A changed byte
 in a gate is a gate that does not hold. Copy from the block.
 
-2. Write every `verbatim` block to its path, byte for byte. The file
-   is the lines between the two fence lines, with LF line endings and
-   one newline after the last line. Create the directories the path
-   needs. Do not change a byte and do not add a header.
+2. Write the first block, `.soul/soul_blocks.py`, to its path, byte
+   for byte. The file is the lines between the two fence lines, with
+   LF line endings and one newline after the last line. Do not change
+   a byte and do not add a header.
 
-3. Check every verbatim file against its marker: the line count, then
-   the SHA-256. Compute the hash with this command, with your name for
+3. Check that file against its marker: the line count, then the
+   SHA-256. Compute the hash with this command, with your name for
    Python 3:
 
-       python3 -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" <path>
+       python3 -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" .soul/soul_blocks.py
 
-   Rewrite any file that differs from its block. Then check it again.
+   Rewrite the file until it matches. A gate written from memory is
+   not the gate, and this file writes every gate.
 
-4. Write every `seed-once` block to its path only when the path does
-   not exist. Replace `<project>` with the name of the repo's
-   directory. Keep a file that exists, and name it in the report.
+4. Run the block writer over this file, from the root of the repo:
+
+       python3 .soul/soul_blocks.py <path of this file> .
+
+   The script writes every `verbatim` block and checks it against its
+   marker. The script writes a `seed-once` block only when its path
+   does not exist, with `<project>` replaced by the name of the repo's
+   directory. One line per block says written, kept, seeded or HASH
+   MISS. A HASH MISS is a defect of this file, not of you. Stop and
+   report it. Name every kept file in the report.
 
 5. When `CLAUDE.md` existed before step 4, insert the soul block at
    the top of the file, under its title. The soul block is the lines
@@ -87,7 +98,7 @@ in a gate is a gate that does not hold. Copy from the block.
     looks first, then commits.
 
 A refresh is the same procedure over a newer `SOUL-INSTALL.md`. Steps
-2, 3 and 5 write again. Step 4 keeps every stub that exists. The rest
+2 to 5 write again, and step 4 keeps every stub that exists. The rest
 holds. A `.git/hooks/pre-commit` an older install wrote is removed,
 because `core.hooksPath` makes git ignore it.
 
@@ -101,11 +112,98 @@ ignores the path. A refresh of a local install keeps the substitutions.
 
 ## Files
 
-<!-- file: SOUL.md | verbatim | 959 lines | sha256 20573830517a72d20d7587a2bd1a0c3505b6e7ed9f0752645c6e91528aea9192 -->
+<!-- file: .soul/soul_blocks.py | verbatim | 83 lines | sha256 019cba0a2cf0fc6e82b62ec80380b7dcc1dae367ce297415aeec790000a51e7b -->
+````
+#!/usr/bin/env python3
+"""Write every file block of SOUL-INSTALL.md into a repo, byte for byte.
+
+    soul_blocks.py <SOUL-INSTALL.md> <repo root> [--skip <path> ...]
+
+This file is the first block of the installer. The agent writes it by
+hand, checks its line count and SHA-256, then runs it for the rest. A
+verbatim block is written and checked against its marker. A seed-once
+block is written only when its path is absent, with `<project>`
+replaced by the name of the root. A file under `.githooks/` is made
+executable. One line per block: written, kept, seeded, skipped, or
+HASH MISS. Exit 1 on any miss.
+"""
+
+import hashlib
+import pathlib
+import re
+import stat
+import sys
+
+HEAD = re.compile(r"^<!-- file: (\S+) \| (verbatim|seed-once)"
+                  r"(?: \| (\d+) lines \| sha256 ([0-9a-f]{64}))? -->$")
+FENCE = "````"
+
+
+def blocks(text):
+    """(path, kind, count, sha, body) per block, in file order."""
+    lines = text.split("\n")
+    i = 0
+    while i < len(lines):
+        head = HEAD.match(lines[i])
+        if head and i + 1 < len(lines) and lines[i + 1] == FENCE:
+            j = i + 2
+            while lines[j] != FENCE:
+                j += 1
+            body = "\n".join(lines[i + 2:j]) + "\n" if j > i + 2 else ""
+            yield head.group(1), head.group(2), head.group(3), \
+                head.group(4), body
+            i = j + 1
+        else:
+            i += 1
+
+
+def write(target, body):
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(body.encode())
+    if ".githooks" in target.parts:
+        target.chmod(target.stat().st_mode | stat.S_IXUSR)
+
+
+def verbatim(target, body, count, sha):
+    """Write the file and tell whether it matches its marker."""
+    write(target, body)
+    got = target.read_bytes()
+    return got.count(b"\n") == count \
+        and hashlib.sha256(got).hexdigest() == sha
+
+
+def main(argv):
+    text = pathlib.Path(argv[1]).read_bytes().decode().replace("\r\n", "\n")
+    root = pathlib.Path(argv[2]).resolve()
+    skip = set(argv[argv.index("--skip") + 1:]) if "--skip" in argv \
+        else set()
+    bad = 0
+    for path, kind, count, sha, body in blocks(text):
+        target = root / path
+        if path in skip:
+            line = f"skipped    {path}"
+        elif kind == "verbatim":
+            ok = verbatim(target, body, int(count), sha)
+            bad += 0 if ok else 1
+            line = f"{'written' if ok else 'HASH MISS'}    {path}"
+        elif target.exists():
+            line = f"kept       {path}"
+        else:
+            write(target, body.replace("<project>", root.name))
+            line = f"seeded     {path}"
+        print(line)
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
+````
+
+<!-- file: SOUL.md | verbatim | 961 lines | sha256 a4c1a6b898205eb54991998d79675b9f382d0aacf1041089be8f49fe91bbd448 -->
 ````
 # SOUL.md
 
-<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at ed1de56 -->
+<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at 6c71c87 -->
 
 You are an agent: a coding model with tools, at the start of a session
 in a repo. This file is the whole working discipline in one place, and
@@ -150,6 +248,7 @@ word with other meanings does not go there.
 | mirror | the public repo that carries the installer, `SOUL.md`, a README and the MIT licence | none | `MIRROR` in `soul.py`, `github.com/leok7v/agentic.soul` |
 | installer | `SOUL-INSTALL.md`: the procedure and the blocks an agent writes into a repo | install script | `install()` in `soul.py` |
 | block | one file inside the installer, between two lines of four backticks | none | `block()` in `soul.py` |
+| block writer | `soul_blocks.py`, the first block of the installer; the agent writes it by hand and runs it for the rest | none | `.soul/soul_blocks.py` |
 | verbatim | a block written byte for byte, with its line count and SHA-256 | none | `manifest()` in `soul.py` |
 | project | a repo that installed `SOUL.md` | downstream, consumer | `.soul/` |
 | checkout | a local copy of a repo on disk; "this checkout" is the origin | none | `HERE` in `bin/apply` |
@@ -334,7 +433,8 @@ Do this once, in the first session, before task work.
    `github.com/leok7v/agentic.soul`, or from a checkout of the origin
    beside the repo. Read it whole and follow it. The file installs
    `SOUL.md`, the gates in `.soul/`, the hook in `.githooks/` and the
-   stubs, through you. Nothing runs on its own.
+   stubs, through you. You write its first block by hand, an 80-line
+   script, and run it for the rest. Nothing runs on its own.
 
 2. Fill in `okf.conf`: the repo's URL prefix, the covered source
    directories and suffixes, the comment prefix.
