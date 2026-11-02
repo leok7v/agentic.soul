@@ -1,6 +1,6 @@
 # SOUL-INSTALL.md
 
-<!-- generated 2026-10-22 from github.com/leok7v/agentic.devs at 5245e49 -->
+<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at ed1de56 -->
 
 You are an agent with a file tool and a shell, in the repo that will
 carry the discipline of `SOUL.md`. This file installs it, through you.
@@ -101,11 +101,11 @@ ignores the path. A refresh of a local install keeps the substitutions.
 
 ## Files
 
-<!-- file: SOUL.md | verbatim | 907 lines | sha256 c7f289c9651c01ce03ee22e9278d0ca3e9cc947b1219e8fc7df58675114f8e9e -->
+<!-- file: SOUL.md | verbatim | 959 lines | sha256 20573830517a72d20d7587a2bd1a0c3505b6e7ed9f0752645c6e91528aea9192 -->
 ````
 # SOUL.md
 
-<!-- generated 2026-10-22 from github.com/leok7v/agentic.devs at 5245e49 -->
+<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at ed1de56 -->
 
 You are an agent: a coding model with tools, at the start of a session
 in a repo. This file is the whole working discipline in one place, and
@@ -140,9 +140,9 @@ word with other meanings does not go there.
 
 | term | meaning | not | code |
 |---|---|---|---|
-| Human | the person this bundle serves; the name per human | the user, the human | none |
+| Human | the person this bundle serves; the name per human; a product's own users are "the app user" | the human | none |
 | agent | the session that reads this bundle and edits code | the assistant | none |
-| harness | the program that runs the agent: Claude Code, with its tools and hooks | the CLI, the TUI | none |
+| harness | the program that runs the agent: Claude Code, with its tools and hooks; a project's command-line tool keeps its own name | the TUI | none |
 | bundle | the `okf/` directory of one repo | knowledge base | `okf/` |
 | concept | one `.md` file with frontmatter under `okf/` | memory file | `concepts()` in `okf_lint.py` |
 | area | one directory of the bundle, such as `rules/` | none | `listed()` in `okf_lint.py` |
@@ -179,7 +179,7 @@ word with other meanings does not go there.
 | resume thread | `tmp/STATE.md`: the gitignored in-flight state, read on the trigger | state file | `tmp/STATE.md` |
 | reminder | a task marked "for Human", acted on when attended | none | none |
 | goal | the standing task Human set | directive, mandate | none |
-| report (verb) | tell Human in the reply, with no wait for an answer | surface, call out | none |
+| report (verb) | tell Human in the reply, with no wait for an answer; "surface" as a verb is this, as a noun it is a project's own word | call out | none |
 | ask | stop work and wait for Human's answer | check in | none |
 | unattended | Human is away and no reply comes | autonomous mode | none |
 | wall clock | minutes of Human's machine or attention | wall time | none |
@@ -226,6 +226,7 @@ Names the harness and the tools use, spelled as the harness spells them:
 | `run_in_background` | the `Bash` option that detaches a command and delivers a completion notification |
 | `TaskList`, `TaskGet`, `TaskUpdate`, `TaskCreate` | the Task tools, the harness task list |
 | `/clear`, `/compact` | harness commands; both are a trigger |
+| `/teleport` | the harness command that moves a session to another machine; cancelled, it removes the untracked files |
 | `SessionStart` | the hook event that runs on startup, clear, resume and compact |
 | `.soul/`, `.githooks/`, `core.hooksPath` | the gates and the hook in a project, and the git config key that points git at the hook |
 | `CLAUDE.local.md`, `.git/info/exclude` | the second instruction file the harness reads, and git's untracked ignore list; the two files of a local install |
@@ -672,8 +673,9 @@ sibling. The original bug is fixed regardless.
 An adviser (a second `claude -p` session over the same files) catches
 the author's assumption failures. Brief it with the checked facts, the
 files to read whole, and the routes already rejected. Ask for ranked
-routes and for what must be written, never for patches. Check its
-claims against the source before you act. An adviser asked "is this
+routes and for what must be written, never for patches.
+
+Check its claims against the source before you act. An adviser asked "is this
 right?" agrees. One asked "what is cheapest and what must be written?"
 audits.
 
@@ -718,6 +720,11 @@ by name where the product looks. A mock is a function of what it was
 asked. A stand-in may reduce the released thing, never differ from it.
 A settled A/B flag is deleted with its losing path. A fallback nobody
 can reach is dead code that looks alive: delete it, or make it loud.
+
+A gate that does not model the sequencing invents a defect. A harness
+that skips a step the product performs reports a fault the product
+cannot produce. Before you trust a defect a harness found, check that
+the harness performs every step of the product, in the same order.
 
 HARD. A number that breaks one of these rules is not cited, not compared
 and not written into a concept. Before you type a number into a reply or
@@ -949,8 +956,8 @@ marks. A Why states the failure and its cost as a plain fact.
    summary at the end.
 
 2. A question about state gets the state: "Not done yet. Do it now?" Do
-   not turn a question into work
-   (ask-and-report).
+   not turn a question into work. See
+   ask-and-report.
 
 3. Register per human: direct and short.
    Casual and humor are welcome, a hedge is not.
@@ -984,6 +991,51 @@ marks. A Why states the failure and its cost as a plain fact.
 Every concept has this frontmatter, keys in this order:
 
 ```
+---
+type: Rule | Feedback | Procedure | Decision | Constraint | Finding |
+      Reference | File
+title: One sentence that states the claim, not the topic
+description: The hook a search matches on. Name the specific thing and,
+  for a rule, when it applies and when it must not.
+sources:
+  - resource: <URL into the repo, one per file the concept describes>
+soul: <section>
+generated: { by: <who>, at: <ISO time> }
+---
+```
+
+- `type` is what OKF v0.2 requires. `title` and `generated` are this
+  bundle's policy. `description` is too, unless the title states the
+  claim in 40 characters or more. `okf_lint.py` demands them.
+
+- Omit `sources:` when there is nothing to name. Do not leave the key
+  empty. A `File` concept names one source, or the platform twins of
+  one, as URLs into the code repo.
+
+- `soul:` names the section of `SOUL.md` the instruction part goes to.
+  A concept without it is not in `SOUL.md`.
+
+- No `: ` inside an unquoted scalar. Quote the value. No `[[wikilink]]`.
+  Filenames are kebab-case.
+
+- Body order: the instruction part (when the rule applies, what to do,
+  what not to do), then a `---` line, then the depth. The depth holds
+  examples, `**Why:**` with one line per incident, `**How to apply:**`,
+  and a checklist where the concept is actionable.
+
+- A `Feedback` concept never skips the Why. The Why lets a future reader
+  judge an edge case instead of blind obedience.
+
+- Link with a bundle-absolute path: `title`.
+
+## 8. When you edit a rule
+
+You edit the thing that governs every future edit. If a rule fails to
+stick (sessions break it again and again), the file is too long, too
+soft or buried. Shorten it, harden it, or turn it into a gate that
+fails. The origin owns the rules, the feedback and the general
+procedures. Edit them there, regenerate `SOUL.md`, then refresh the
+projects from the new `SOUL-INSTALL.md`.
 
 ## 11. Before you declare anything done
 
@@ -1406,7 +1458,7 @@ def main():
 main()
 ````
 
-<!-- file: .soul/ste_lint.py | verbatim | 318 lines | sha256 406d4b7e0c4c3e0d36c570a18c2dd4b3a6a1b4fb21d293ab30f0182c17aba1d8 -->
+<!-- file: .soul/ste_lint.py | verbatim | 331 lines | sha256 34cdeb468ac781841845bee612c6eb2feba605b89938ac24ab51dcff3d4a9606 -->
 ````
 #!/usr/bin/env python3
 """Fail when prose breaks the writing rules of the bundle.
@@ -1414,11 +1466,14 @@ main()
     ste_lint.py [--root <project>] [--staged] [--report] [<file>...]
 
 Every sentence outside protected text (frontmatter, fenced and indented
-blocks, tables, code spans, link targets, `>` quotations) is checked:
+blocks, tables, code spans, links, `>` quotations) is checked:
 words over the limit, a semicolon, a hedge, a contraction, an -ing verb,
 a perfect tense, an agentless passive, a bare pronoun that opens it. A
 perfect after a modal ("could have failed") is a hedge and stands. A
-paragraph over 6 sentences, a
+sentence ends at `.`, `!` or `?` before a space, whatever follows, so an
+identifier or a number may open the next one. A link counts as one
+word, LINK, so a slug is never read as prose. A paragraph over 6
+sentences, a
 non-ASCII byte and a prose line over 79 columns are faults anywhere.
 okf.conf `prose` lists the files and directories, default `okf CLAUDE.md`.
 `--staged` checks only the staged files among them; `--report` prints
@@ -1470,7 +1525,7 @@ IMPERATIVE = re.compile(
     r"Define|Fill|Change|Copy|Move|Pull|Push|Load|Point|Capture|Declare|"
     r"Expect|Spell|Quote|Collapse|Wrap|Align|Return|Judge|Store|Save|"
     r"Follow|Obey|Build|Gate|Trust|Derive|Insert|Separate|Group|Rerun|"
-    r"Launch|Order|Walk|Raise|Lower|Prove|Resolve|Attach|Rename|Compute|"
+    r"Order|Walk|Raise|Lower|Prove|Resolve|Attach|Rename|Compute|"
     r"Collect|Install|Seed|Refuse|Convert|Flag|Classify|Bring|Create|"
     r"Omit|Link|Size|Front-load|Decide|Break|Pin|Strip|Restore|Discard|"
     r"Interleave|Cite|Note|Brief|Re-create|Trim|Sample|Delegate|Grow)\b")
@@ -1540,7 +1595,7 @@ ITEM = re.compile(r"^\s*([-*]|\d+\.)\s+(\[[ x]\]\s+)?")
 LEAD = re.compile(r"^\*\*[^*]+\*\*:?\s*")
 ABBREV = re.compile(r"\b(vs|cf|approx|no|Dr|Mr|Fig|sec|min|al)\.")
 QUOTED = re.compile(r'"[^"]*"')
-SPLIT = re.compile(r"(?<=[.!?])[\"')]?\s+(?=[A-Z\"'(\[`*]|CODE)")
+SPLIT = re.compile(r"(?<=[.!?])[\"')]?\s+(?=\S)")
 
 
 def prose_lines(text):
@@ -1579,7 +1634,7 @@ def units(lines):
     paragraphs = []
     current = []
     for number, line in lines + [(0, "")]:
-        text = LINK.sub(r"\1", SPAN.sub("CODE", line)).strip()
+        text = LINK.sub("LINK", SPAN.sub("CODE", line)).strip()
         if text == "" and current:
             paragraphs.append(current)
             current = []
@@ -1591,16 +1646,26 @@ def units(lines):
 
 
 def sentences(unit):
-    """[(lineno, sentence)] out of one unit."""
+    """[(lineno, sentence)] out of one unit. A quoted mention is one
+    token while the unit is split, so a period inside it ends nothing."""
     number, text = unit
     text = ITEM.sub("", text)
     text = LEAD.sub("", text)
     text = ABBREV.sub(r"\1<DOT>", text)
     text = re.sub(r"(\w)\.(\w)", r"\1<DOT>\2", text)
     text = text.replace("...", "<ELL>")
+    quotes = QUOTED.findall(text)
+    for index, quote in enumerate(quotes):
+        text = text.replace(quote, f"<Q{index}>", 1)
     parts = SPLIT.split(text)
-    return [(number, p.replace("<DOT>", ".").replace("<ELL>", "...").strip())
-            for p in parts if p.strip()]
+    out = []
+    for part in parts:
+        for index, quote in enumerate(quotes):
+            part = part.replace(f"<Q{index}>", quote)
+        part = part.replace("<DOT>", ".").replace("<ELL>", "...").strip()
+        if part:
+            out.append((number, part))
+    return out
 
 
 def sentence_faults(sentence):
@@ -1728,7 +1793,7 @@ if __name__ == "__main__":
     sys.exit(main(sys.argv))
 ````
 
-<!-- file: .soul/term_lint.py | verbatim | 229 lines | sha256 d24fd7fc3381e4a39d022f825ed121c60c42421fd4292515f0f13c1a96733db2 -->
+<!-- file: .soul/term_lint.py | verbatim | 231 lines | sha256 b4772a40dec055f89eb95ced3722815d124deaff6d017e83f3f2afd8ed16592a -->
 ````
 #!/usr/bin/env python3
 """Fail when prose uses a word the lexicon rejects, or names in backticks
@@ -1742,7 +1807,8 @@ A lexicon is a markdown table with a `term` or `name` column; okf.conf
 at the root counts when it exists. The keys of okf.conf are known
 names too. Every phrase of a row's `not` column
 found in prose is a fault that names the term; a quoted word is a
-mention and is not checked, and a `**Why:**` block may name an
+mention and is not checked, a link (its title and its target) is a
+reference and is not checked, and a `**Why:**` block may name an
 identifier of the repo its incident happened in. A backticked token
 shaped like an identifier or a path must be a path under the project,
 its bundle or this checkout, a file name in either, a lexicon term, name
@@ -1896,6 +1962,7 @@ def check(path, rejected, known, text, names, fenced):
     raw = path.read_text(errors="replace")
     for number, line in ste_lint.prose_lines(raw):
         prose = QUOTED.sub(" ", ste_lint.SPAN.sub(" ", line))
+        prose = ste_lint.LINK.sub(" ", prose)
         for phrase, term in rejected:
             if re.search(rf"\b{re.escape(phrase)}\b", prose, re.I):
                 faults.append((number, f"'{phrase}' is not the term; "

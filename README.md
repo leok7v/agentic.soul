@@ -53,6 +53,11 @@ it finds in the repo. Then the agent runs every gate, breaks one on
 purpose to see it refuse, and reports. The agent does not commit. You
 look first.
 
+Then commit the install before anything else. The installed files are
+untracked until you do, and a stash, a branch switch or a cancelled
+`/teleport` in Claude Code removes untracked files. One session lost
+an hour that way.
+
 ## What to expect after the install
 
 - `SOUL.md` at the root, about 900 lines. The agent reads it on every
@@ -66,6 +71,12 @@ look first.
   lexicon, the type table and the read-by-tier procedure. The bundle
   grows from there, in the same commit as the code it describes.
 - `okf.conf`, the values the gates read, and `tmp/` in `.gitignore`.
+- `.claude/settings.json` with a `SessionStart` hook that prints the
+  open tasks. A repo that ignores `.claude/` loses it. A hook in
+  `~/.claude/settings.json` that runs `.soul/session_start.py` when the
+  project has one does the same job for every repo:
+
+      sh -c 'f="${CLAUDE_PROJECT_DIR:-.}/.soul/session_start.py"; [ -f "$f" ] && exec python3 "$f"; exit 0'
 
 Then every commit runs four gates, and a commit is refused on:
 
