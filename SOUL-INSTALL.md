@@ -1,6 +1,6 @@
 # SOUL-INSTALL.md
 
-<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at 6c71c87 -->
+<!-- generated 2026-11-20 from github.com/leok7v/agentic.devs at eb65189 -->
 
 You are an agent with a file tool and a shell, in the repo that will
 carry the discipline of `SOUL.md`. This file installs it, through you.
@@ -199,11 +199,11 @@ if __name__ == "__main__":
     sys.exit(main(sys.argv))
 ````
 
-<!-- file: SOUL.md | verbatim | 961 lines | sha256 a4c1a6b898205eb54991998d79675b9f382d0aacf1041089be8f49fe91bbd448 -->
+<!-- file: SOUL.md | verbatim | 968 lines | sha256 f8b2c4d9dcc79402370479982fc6dba519bb2c0db2c49f7bbebb4f3eab9ef829 -->
 ````
 # SOUL.md
 
-<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at 6c71c87 -->
+<!-- generated 2026-11-20 from github.com/leok7v/agentic.devs at eb65189 -->
 
 You are an agent: a coding model with tools, at the start of a session
 in a repo. This file is the whole working discipline in one place, and
@@ -268,8 +268,8 @@ word with other meanings does not go there.
 | compaction | the harness replaces the context with a summary | none | `isCompactSummary` |
 | watcher | `ctx-watch.py` run under the `Monitor` tool | ticker | `ctx-watch.py` |
 | budget | the tokens left in the window for reads | none | marks 90, 95, 99 |
-| whole-file read | a `Read` with no `offset` and no `limit` | full read | `whole_file_reads()` in `ctx_cost.py` |
-| partial read | `grep`, `sed -n`, `tail`, or a `Read` with `offset` or `limit` | windowed view, grep-peek, peek, peephole | `offset`, `limit` |
+| whole-file read | a `Read` with no `offset` and no `limit`; for a file over the cap of one call, a run of ranges with no gap, first line to last, in one turn | full read | `whole_file_reads()` in `ctx_cost.py` |
+| partial read | `grep`, `sed -n`, `tail`, or a `Read` with `offset` or `limit` that is not in such a run | windowed view, grep-peek, peek, peephole | `offset`, `limit` |
 | tier 1 read | the whole-file reads done on the trigger, before task work | ritual | `read-by-tier.md` |
 | tier 2, tier 3 | files read whole when the task enters the layer (2) or the file (3) | none | `read-by-tier.md` |
 | task | one numbered entry of the task list, `#NN` and its subject | none | `okf/tasks.md` |
@@ -507,6 +507,13 @@ grepped a moment ago, for a file the summary describes, for a one-line
 change. `grep` and `sed` locate a symbol. They never justify an edit. A
 partial read answers the question asked and hides the question not
 asked. Every seam bug got out this way.
+
+Some files are too large for one `Read` call. Read such a file as a
+run of `Read` calls with `offset` and `limit`. The ranges follow each
+other with no gap, from the first line to the last. Make all the calls
+in one turn, with no other work between them. No other set of partial
+reads is a whole-file read. Lines from a `grep`, from an
+earlier turn or from your own `Write` do not count as read.
 
 Before you add a field, a struct or a flag, name the existing state.
 Ask what would have to be wrong with it for the new state to be needed.
@@ -1164,7 +1171,7 @@ projects from the new `SOUL-INSTALL.md`.
       MUSTs intact. `ste_lint.py` and `term_lint.py` at exit 0.
 ````
 
-<!-- file: .soul/okfconf.py | verbatim | 37 lines | sha256 816c031115ab0df3a994b02c027f6e92d14bb4396bce28ed6945da19e6681d3c -->
+<!-- file: .soul/okfconf.py | verbatim | 45 lines | sha256 ac3e542db2ddc090ce0251b24aa5a15938a1e00cbfbd8e157d8449d1fdd85d12 -->
 ````
 """The one reader of okf.conf, shared by every script beside it."""
 
@@ -1196,6 +1203,14 @@ def read(root):
     return out
 
 
+def walk(path):
+    """Every path under a covered entry, sorted. An entry that is a file
+    is itself, for a project whose sources sit in its root."""
+    path = pathlib.Path(path)
+    return sorted(path.rglob("*")) if path.is_dir() \
+        else [path] if path.exists() else []
+
+
 def one(conf, key, default=""):
     values = conf.get(key) or []
     return values[0] if values else default
@@ -1205,7 +1220,7 @@ def many(conf, key, default=()):
     return list(conf.get(key) or default)
 ````
 
-<!-- file: .soul/okf_lint.py | verbatim | 243 lines | sha256 57c4ffd1e60bcd2402af082ace5b421b0299c66481f0ada6eed973dce506868f -->
+<!-- file: .soul/okf_lint.py | verbatim | 243 lines | sha256 0ad7d5662f77ea2e2bad94b7d295c2b402d63bebfbaa4d28ec179d07d11df8c6 -->
 ````
 #!/usr/bin/env python3
 """Check a knowledge bundle: frontmatter, vocabulary, and every link.
@@ -1367,7 +1382,7 @@ def pointers():
     """A reference into the bundle from a source file, in either spelling."""
     faults = []
     for area in COVERED:
-        for one in sorted((ROOT / area).rglob("*")):
+        for one in okfconf.walk(ROOT / area):
             rel = one.relative_to(ROOT).as_posix()
             skip = one.name == "okf_lint.py" or rel in VENDORED or scratch(rel)
             if one.suffix in SOURCE_SUFFIX and not skip:
@@ -1893,7 +1908,7 @@ if __name__ == "__main__":
     sys.exit(main(sys.argv))
 ````
 
-<!-- file: .soul/term_lint.py | verbatim | 231 lines | sha256 b4772a40dec055f89eb95ced3722815d124deaff6d017e83f3f2afd8ed16592a -->
+<!-- file: .soul/term_lint.py | verbatim | 231 lines | sha256 845ef4cd6328c012f3c0d81c6306377441d7408a26ff1ddd3802b107407d1353 -->
 ````
 #!/usr/bin/env python3
 """Fail when prose uses a word the lexicon rejects, or names in backticks
@@ -1998,8 +2013,8 @@ def corpus():
                                            ROOT / ".soul", ROOT / ".githooks",
                                            ROOT / "okf", HERE / "okf"]
     tooling = {"bin", "scripts", ".soul", ".githooks"}
-    for one in (p for root in roots if root.is_dir()
-                for p in sorted(root.rglob("*"))
+    for one in (p for root in roots
+                for p in okfconf.walk(root)
                 if p.is_file() and not p.name.startswith(".")
                 and "__pycache__" not in p.parts):
         names.add(one.name)
@@ -2082,7 +2097,7 @@ def seed(count, known):
     lexicon's."""
     files = {}
     text, _ = corpus()
-    for one in (p for a in COVERED for p in sorted((ROOT / a).rglob("*"))
+    for one in (p for a in COVERED for p in okfconf.walk(ROOT / a)
                 if p.is_file() and p.suffix in SUFFIX):
         body = one.read_text(errors="replace")
         words = {w.lower() for ident in set(IDENT.findall(body))
@@ -2128,7 +2143,7 @@ if __name__ == "__main__":
     sys.exit(main(sys.argv))
 ````
 
-<!-- file: .soul/ctx_cost.py | verbatim | 196 lines | sha256 eb1811fae705fdc4e347ee525d49e6f04cff91b7ba568c49c1932b51fb770816 -->
+<!-- file: .soul/ctx_cost.py | verbatim | 196 lines | sha256 7104b132471efa67c9e9a9a61a398b2f621f92939041abf734a3fbb6dc6e6c3f -->
 ````
 #!/usr/bin/env python3
 """Tokens per source file, measured from a session transcript.
@@ -2244,7 +2259,7 @@ def ratio_of(samples):
 def source_files():
     out = []
     for top in SOURCE_DIRS:
-        for p in sorted((ROOT / top).rglob("*")):
+        for p in okfconf.walk(ROOT / top):
             if p.suffix in SOURCE_SUFFIX and p.is_file():
                 text = p.read_bytes()
                 lines = text.count(b"\n")

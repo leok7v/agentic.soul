@@ -1,6 +1,6 @@
 # SOUL.md
 
-<!-- generated 2026-11-01 from github.com/leok7v/agentic.devs at 6c71c87 -->
+<!-- generated 2026-11-20 from github.com/leok7v/agentic.devs at eb65189 -->
 
 You are an agent: a coding model with tools, at the start of a session
 in a repo. This file is the whole working discipline in one place, and
@@ -65,8 +65,8 @@ word with other meanings does not go there.
 | compaction | the harness replaces the context with a summary | none | `isCompactSummary` |
 | watcher | `ctx-watch.py` run under the `Monitor` tool | ticker | `ctx-watch.py` |
 | budget | the tokens left in the window for reads | none | marks 90, 95, 99 |
-| whole-file read | a `Read` with no `offset` and no `limit` | full read | `whole_file_reads()` in `ctx_cost.py` |
-| partial read | `grep`, `sed -n`, `tail`, or a `Read` with `offset` or `limit` | windowed view, grep-peek, peek, peephole | `offset`, `limit` |
+| whole-file read | a `Read` with no `offset` and no `limit`; for a file over the cap of one call, a run of ranges with no gap, first line to last, in one turn | full read | `whole_file_reads()` in `ctx_cost.py` |
+| partial read | `grep`, `sed -n`, `tail`, or a `Read` with `offset` or `limit` that is not in such a run | windowed view, grep-peek, peek, peephole | `offset`, `limit` |
 | tier 1 read | the whole-file reads done on the trigger, before task work | ritual | `read-by-tier.md` |
 | tier 2, tier 3 | files read whole when the task enters the layer (2) or the file (3) | none | `read-by-tier.md` |
 | task | one numbered entry of the task list, `#NN` and its subject | none | `okf/tasks.md` |
@@ -304,6 +304,13 @@ grepped a moment ago, for a file the summary describes, for a one-line
 change. `grep` and `sed` locate a symbol. They never justify an edit. A
 partial read answers the question asked and hides the question not
 asked. Every seam bug got out this way.
+
+Some files are too large for one `Read` call. Read such a file as a
+run of `Read` calls with `offset` and `limit`. The ranges follow each
+other with no gap, from the first line to the last. Make all the calls
+in one turn, with no other work between them. No other set of partial
+reads is a whole-file read. Lines from a `grep`, from an
+earlier turn or from your own `Write` do not count as read.
 
 Before you add a field, a struct or a flag, name the existing state.
 Ask what would have to be wrong with it for the new state to be needed.
