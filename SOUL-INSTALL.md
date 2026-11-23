@@ -1,6 +1,6 @@
 # SOUL-INSTALL.md
 
-<!-- generated 2026-11-20 from github.com/leok7v/agentic.devs at eb65189 -->
+<!-- generated 2026-11-22 from github.com/leok7v/agentic.devs at 2b76df6 -->
 
 You are an agent with a file tool and a shell, in the repo that will
 carry the discipline of `SOUL.md`. This file installs it, through you.
@@ -199,11 +199,11 @@ if __name__ == "__main__":
     sys.exit(main(sys.argv))
 ````
 
-<!-- file: SOUL.md | verbatim | 968 lines | sha256 f8b2c4d9dcc79402370479982fc6dba519bb2c0db2c49f7bbebb4f3eab9ef829 -->
+<!-- file: SOUL.md | verbatim | 968 lines | sha256 c336a7dc9f3fedfc5e204e7b75c22458d97722e1da8df062353be8cec9b819ce -->
 ````
 # SOUL.md
 
-<!-- generated 2026-11-20 from github.com/leok7v/agentic.devs at eb65189 -->
+<!-- generated 2026-11-22 from github.com/leok7v/agentic.devs at 2b76df6 -->
 
 You are an agent: a coding model with tools, at the start of a session
 in a repo. This file is the whole working discipline in one place, and
@@ -806,7 +806,7 @@ wait. In Claude Code it is `ScheduleWakeup`. If the harness has none,
 build one: a `Monitor` on a marker file the remote job writes. NEVER
 `sleep`, `timeout`, or `until ...; do sleep N; done`. A `pgrep -f` on
 a pattern the waiter's own command line contains matches itself and
-never exits.
+never exits. A brief to a subagent repeats this rule in its own words.
 
 Never edit a shell script while it runs: zsh reads from a byte offset
 and resumes mid-statement in garbage. Copy and change the copy, or wait.
